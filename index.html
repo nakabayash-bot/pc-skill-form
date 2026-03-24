@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PCスキル確認</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    background: #f7f8fc;
+    color: #2d3748;
+    -webkit-text-size-adjust: 100%;
+  }
+  .page { max-width: 480px; margin: 0 auto; padding: 0 0 20px; min-height: 100vh; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #2c5282 0%, #2b6cb0 100%);
+    color: #fff;
+    padding: 28px 20px 22px;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 20px;
+  }
+  .header-done {
+    background: linear-gradient(135deg, #276749 0%, #38a169 100%);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-title { font-size: 20px; font-weight: 700; letter-spacing: 0.02em; }
+  .header-sub { font-size: 13px; opacity: 0.85; margin-top: 6px; line-height: 1.6; }
+
+  /* Section card */
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    margin: 0 12px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 14px 16px;
+    background: #fff; border: none; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    text-align: left; font-family: inherit;
+  }
+  .section-left { display: flex; align-items: center; gap: 12px; }
+  .section-right { display: flex; align-items: center; gap: 8px; }
+  .section-icon { font-size: 22px; }
+  .section-name { font-size: 15px; font-weight: 700; color: #1a202c; }
+  .section-sub { font-size: 11px; color: #a0aec0; }
+  .badge {
+    color: #fff; font-size: 12px; font-weight: 700;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chevron {
+    font-size: 10px; color: #a0aec0;
+    transition: transform 0.2s; display: inline-block;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  /* Options */
+  .options { padding: 4px 16px 12px; border-top: 1px solid #f0f0f0; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 12px;
+    width: 100%; padding: 12px 14px; margin-top: 6px;
+    border-radius: 10px; border: 1.5px solid #e2e8f0;
+    background: #fff; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s; text-align: left; font-family: inherit; font-size: 14px;
+  }
+  .option-btn.checked { border-color: var(--sec-color); background: var(--sec-bg); }
+  .checkbox {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 6px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .option-btn.checked .checkbox {
+    background: var(--sec-color); border-color: var(--sec-color);
+  }
+  .option-label { line-height: 1.5; color: #2d3748; }
+
+  /* Inputs */
+  .other-input, .textarea {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1.5px solid #e2e8f0; font-size: 14px;
+    outline: none; font-family: inherit; line-height: 1.6;
+  }
+  .other-input { margin-top: 8px; }
+  .textarea { resize: vertical; }
+
+  /* Typing */
+  .typing-row { display: flex; gap: 8px; padding: 0 16px 16px; }
+  .typing-btn {
+    flex: 1; padding: 10px 0; border-radius: 10px;
+    border: 1.5px solid #e2e8f0; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent; font-family: inherit;
+    background: #fff; color: #4a5568;
+  }
+  .typing-btn.active { background: #ed8936; color: #fff; border-color: #ed8936; }
+
+  /* Free field */
+  .free-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px; }
+  .free-label { font-size: 14px; font-weight: 700; color: #2d3748; }
+  .free-body { padding: 0 16px 16px; }
+
+  /* Submit */
+  .submit-btn {
+    display: block; width: calc(100% - 24px); margin: 20px 12px 0;
+    padding: 16px; border-radius: 14px; border: none;
+    background: linear-gradient(135deg, #2c5282 0%, #2b6cb0 100%);
+    color: #fff; font-size: 16px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.05em; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Result */
+  .result-card { background: #fff; border-radius: 14px; margin: 0 12px 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: auto; }
+  .result-pre { white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.8; color: #2d3748; font-family: inherit; }
+  .btn-row { display: flex; gap: 10px; padding: 0 12px; }
+  .back-btn {
+    flex: 1; padding: 14px; border-radius: 12px;
+    border: 1.5px solid #e2e8f0; background: #fff;
+    color: #4a5568; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .copy-btn {
+    flex: 1; padding: 14px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #276749, #38a169);
+    color: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .hint { text-align: center; font-size: 12px; color: #a0aec0; margin-top: 12px; padding: 0 20px; }
+  .spacer { height: 40px; }
+</style>
+</head>
+<body>
+
+<div class="page" id="app"></div>
+
+<script>
+const SECTIONS = [
+  { id:'word', icon:'📝', title:'Word', subtitle:'ワード', color:'#2b5797',
+    options:['基本的な文書作成（文字入力・保存）','書式設定（フォント変更・段落調整・表の挿入）','ビジネス文書の作成（送付状・議事録など）','差し込み印刷'] },
+  { id:'excel', icon:'📊', title:'Excel', subtitle:'エクセル', color:'#217346',
+    options:['基本的なデータ入力・表作成','四則演算（SUM・AVERAGEなど基本関数）','IF・VLOOKUP などの関数','ピボットテーブル・グラフ作成','マクロ・VBA'] },
+  { id:'ppt', icon:'📽️', title:'PowerPoint', subtitle:'パワーポイント', color:'#d24726',
+    options:['基本的なスライド作成','図表・画像の挿入・編集','アニメーション設定'] },
+  { id:'other', icon:'🔧', title:'その他ツール', subtitle:'使用経験のあるもの', color:'#6b46c1',
+    options:['Googleスプレッドシート / Googleドキュメント','メールソフト（Outlook / Gmailなど）','ビジネスチャット（Slack / Teamsなど）'] },
+];
+
+const FREE_FIELDS = [
+  { id:'biz_sys', icon:'🏢', label:'アレップスで使用していたソフト・システム', placeholder:'例：賃貸管理システム、○○ソフト など' },
+  { id:'other_sys', icon:'', label:'その他の業務システム', placeholder:'例：POSレジ、在庫管理ソフト など' },
+  { id:'quals', icon:'📜', label:'保有資格', placeholder:'例：MOS (Excel)、日商PC検定、普通自動車免許 など' },
+];
+
+// State
+let checks = {};
+let otherTexts = {};
+let freeTexts = {};
+let typing = '';
+let openSection = null;
+let submitted = false;
+
+function render() {
+  const app = document.getElementById('app');
+  if (submitted) { renderResult(app); return; }
+  let h = '';
+
+  // Header
+  h += `<div class="header">
+    <div class="header-title">PCスキル確認</div>
+    <div class="header-sub">職務経歴書に記載するため、<br>該当するものをタップしてください</div>
+  </div>`;
+
+  // Sections
+  SECTIONS.forEach(sec => {
+    const isOpen = openSection === sec.id;
+    const count = sec.options.filter((_,i) => checks[sec.id+'-'+i]).length;
+    h += `<div class="card">`;
+    h += `<button class="section-header" style="border-left:4px solid ${sec.color}" onclick="toggleSection('${sec.id}')">
+      <div class="section-left">
+        <span class="section-icon">${sec.icon}</span>
+        <div><div class="section-name">${sec.title}</div><div class="section-sub">${sec.subtitle}</div></div>
+      </div>
+      <div class="section-right">
+        ${count > 0 ? `<span class="badge" style="background:${sec.color}">${count}</span>` : ''}
+        <span class="chevron ${isOpen?'open':''}">▼</span>
+      </div>
+    </button>`;
+    if (isOpen) {
+      h += `<div class="options" style="--sec-color:${sec.color};--sec-bg:${sec.color}11">`;
+      sec.options.forEach((opt, i) => {
+        const key = sec.id+'-'+i;
+        const on = !!checks[key];
+        h += `<button class="option-btn ${on?'checked':''}" onclick="toggleCheck('${key}')">
+          <span class="checkbox">${on?'✓':''}</span>
+          <span class="option-label">${opt}</span>
+        </button>`;
+      });
+      h += `<input class="other-input" type="text" placeholder="その他（自由入力）" value="${esc(otherTexts[sec.id]||'')}" oninput="otherTexts['${sec.id}']=this.value">`;
+      h += `</div>`;
+    }
+    h += `</div>`;
+  });
+
+  // Typing
+  h += `<div class="card">
+    <div class="section-header" style="border-left:4px solid #ed8936;cursor:default">
+      <div class="section-left"><span class="section-icon">⌨️</span><div><div class="section-name">タイピング</div><div class="section-sub">自己評価</div></div></div>
+    </div>
+    <div class="typing-row">
+      ${['速い','普通','ゆっくり'].map(t => `<button class="typing-btn ${typing===t?'active':''}" onclick="setTyping('${t}')">${t}</button>`).join('')}
+    </div>
+  </div>`;
+
+  // Free fields
+  FREE_FIELDS.forEach(f => {
+    h += `<div class="card">
+      <div class="free-header">${f.icon?`<span style="font-size:20px">${f.icon}</span>`:''}<span class="free-label">${f.label}</span></div>
+      <div class="free-body"><textarea class="textarea" rows="2" placeholder="${f.placeholder}" oninput="freeTexts['${f.id}']=this.value">${esc(freeTexts[f.id]||'')}</textarea></div>
+    </div>`;
+  });
+
+  h += `<button class="submit-btn" onclick="submit()">回答を確認する →</button>`;
+  h += `<div class="spacer"></div>`;
+  app.innerHTML = h;
+}
+
+function renderResult(app) {
+  const text = buildSummary();
+  app.innerHTML = `
+    <div class="header header-done">
+      <span style="font-size:20px">✅</span>
+      <span class="header-title">回答内容の確認</span>
+    </div>
+    <div class="result-card"><pre class="result-pre">${esc(text)}</pre></div>
+    <div class="btn-row">
+      <button class="back-btn" onclick="goBack()">← 修正する</button>
+      <button class="copy-btn" onclick="copyText()">📋 コピー</button>
+    </div>
+    <p class="hint">コピーして、LINEやメールで送信してください</p>
+  `;
+}
+
+function buildSummary() {
+  let lines = ['━━━ PCスキル回答 ━━━', ''];
+  SECTIONS.forEach(sec => {
+    const sel = sec.options.filter((_,i) => checks[sec.id+'-'+i]);
+    lines.push('■ ' + sec.title);
+    if (!sel.length) { lines.push('  使用経験なし'); }
+    else { sel.forEach(s => lines.push('  ✓ ' + s)); }
+    if (otherTexts[sec.id]) lines.push('  その他: ' + otherTexts[sec.id]);
+    lines.push('');
+  });
+  lines.push('■ タイピング（自己評価）: ' + (typing || '未回答'), '');
+  FREE_FIELDS.forEach(f => {
+    lines.push('■ ' + f.label);
+    lines.push('  ' + (freeTexts[f.id] || '未記入'));
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+function toggleSection(id) { openSection = openSection===id ? null : id; render(); }
+function toggleCheck(key) { checks[key] = !checks[key]; render(); }
+function setTyping(t) { typing = t; render(); }
+function submit() { submitted = true; render(); window.scrollTo(0,0); }
+function goBack() { submitted = false; render(); }
+function copyText() {
+  const text = buildSummary();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert('コピーしました！\nこのテキストをLINEで送信してください。'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('コピーしました！');
+  }
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+render();
+</script>
+</body>
+</html>
